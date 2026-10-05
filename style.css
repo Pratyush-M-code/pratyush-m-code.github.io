@@ -1,7 +1,23 @@
 @import url('https://googleapis.com');
 
+:root {
+    --bg: #0a0f1d;
+    --header: #0a1a2a;
+    --footer: #1c3a4a;
+    --panel: rgba(20, 20, 20, 0.2);
+    --border: #4a5cc0;
+    --shadow: #05081c;
+    --overlay: rgba(36, 47, 119, 0.5);
+    --h1: #2e5a4a;
+    --h2: #3a5a4a;
+    --text: #8a9d4d;
+    --accent-home: #B5511F;
+    --accent: #000000;
+    --font-heading: "Geist Pixel";
+    --font-body: "IBM Plex Mono";
+}
 body{
-    background-color: #0a0f1d;
+    background-color: var(--bg);
     display: flex;
     flex-direction: column;
     min-height: 100dvh;
@@ -10,35 +26,37 @@ body{
     overflow-x: hidden;
 }
 header{
-    background-color: #0a1a2a;
+    background-color: var(--header);
     width: 100%;
+    border-bottom: 5px solid var(--accent);
 }
 footer{
-    background-color: #1a2a3a;
+    background-color: var(--footer);
     width: 100%;
     margin: 0;
     padding: 0;
+    border-top: var(--accent);
 }
 h1{
-    color: #2e5a4a;
+    color: var(--h1);
     font-size: 2rem;
-    font-family: Inter, monospace;
+    font-family: var(--font-heading), monospace;
     line-height: 1.15;
     font-optical-sizing: auto;
     font-weight: 700;
     font-style: normal;
 }
 h2{
-    color: #3a5a4a;
-    font-size: 1.75rem;
-    font-family: Inter, monospace;
+    color: var(--h2);
+    font-size: 1.5rem;
+    font-family: var(--font-heading), monospace;
     line-height: 1.15;
     font-optical-sizing: auto;
     font-weight: 700;
     font-style: normal;
 }
 p{
-    color: #3a5a4a;
+    color: var(--text);
     font-size: 1rem;
     font-family: monospace;
     line-height: 1.2;
@@ -48,7 +66,7 @@ p{
 }
 
 .home{
-    color: #B5511F;
+    color: var(--accent-home);
 }
 
 .overlay{
@@ -64,7 +82,7 @@ p{
     font-optical-sizing: auto;
     font-weight: 700;
     font-style: normal;
-    border-right: 1rem solid #B5511F;
+    border-right: 1rem solid var(--accent);
     padding-right: 0.25rem;
     animation: blink 750ms steps(1) infinite;
 }

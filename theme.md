@@ -21,3 +21,16 @@
 | Body | Inter | 400 | 1.2 |
 | H1 / H2 | Inter | 700 | 1.15 |
 | Code | System Monospace | 400 | 1.1 |
+
+Home
+#B5511F (rust)
+#C89A5A
+Ideas
+#4A7856 (green)
+#5B8C4A
+Work
+#3A6EA5 (blue)
+#5A8CA8
+Hobbies
+#7A5C8E (purple)
+#9B7EA8
