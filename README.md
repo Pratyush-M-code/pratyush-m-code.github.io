@@ -18,6 +18,8 @@ A simple portfolio website to display my projects!
 - My Substack posts using the RSS API.
 - My GitHub projects using the GitHub API.
 
+![Home Page](assets/image.png)
+
 ### Tech Stack
 
 - **JavaScript**
