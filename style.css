@@ -72,7 +72,7 @@ p {
 }
 
 .overlay {
-    border: 5px solid var(--accent-home);
+
     padding: 0;
     border-radius: 10px;
 }
@@ -175,239 +175,342 @@ p {
     animation: blink 750ms steps(1) infinite;
 }
 
-.substack-card {
-    display: block;
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    border: 1px solid var(--accent-home);
-    border-radius: 8px;
+#substack-feed-embed,
+.substack-feed-embed {
+    --sub-bg: #0b1020;
+    --sub-fg: #dfdbd2;
+    --sub-dim: #8a94a8;
+    /* 6:1 on the background */
+    --sub-line: #3a4258;
+    /* tree lines */
+    --sub-tan: var(--accent-home, #C89A5A);
+    --sub-green: var(--text, #8a9d4d);
+    --sub-hot: #e0763a;
+
+    box-sizing: border-box;
+    max-width: 100%;
+    padding: 1rem;
+    background: var(--sub-bg);
+    border-radius: 6px;
+    color: var(--sub-fg);
+    font-family: var(--font-body), monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    /* long titles wrap, never scroll sideways */
+}
+
+@media (min-width: 600px) {
+
+    #substack-feed-embed,
+    .substack-feed-embed {
+        padding: 1.25rem 1.5rem;
+        font-size: 0.95rem;
+    }
+}
+
+#substack-feed-embed a,
+.substack-feed-embed a {
     text-decoration: none;
 }
 
-.substack-card:hover {
-    background: rgb(255 255 255 / 0.05);
+/* prompt line */
+.sub-cmd {
+    margin: 0 0 0.6rem;
+    color: var(--sub-fg);
+    font: inherit;
+    font-weight: 600;
 }
 
-.substack-post {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
+.sub-prompt {
+    margin-right: 0.5ch;
+    color: var(--sub-hot);
 }
 
-.substack-thumbnail {
-    width: 120px;
-    height: 80px;
+.sub-comment {
+    color: var(--sub-dim);
+    font-weight: 400;
+}
+
+/* posts: a tree, drawn with borders so it survives line wrapping */
+.sub-tree {
+    margin-left: 0.5ch;
+}
+
+.sub-post {
+    position: relative;
+    display: block;
+    padding: 0 0 1rem 2.5ch;
+    border-left: 1px solid var(--sub-line);
+    color: inherit;
+}
+
+.sub-post::before {
+    /* the horizontal tick */
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.75em;
+    width: 2ch;
+    border-top: 1px solid var(--sub-line);
+}
+
+.sub-post:last-child {
+    /* the last branch curves instead of continuing */
+    padding-bottom: 0;
+    border-left-color: transparent;
+}
+
+.sub-post:last-child::after {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: 0;
+    height: 0.75em;
+    border-left: 1px solid var(--sub-line);
+}
+
+.sub-title {
+    display: block;
+    color: var(--sub-tan);
+    font-weight: 700;
+}
+
+.sub-post:hover .sub-title {
+    text-decoration: underline;
+}
+
+.sub-desc {
+    display: block;
+    color: var(--sub-green);
+}
+
+.sub-meta {
+    display: block;
+    color: var(--sub-dim);
+    font-size: 0.85em;
+}
+
+/* optional image (data-show-images="true") */
+.sub-thumb {
+    display: block;
+    width: 100%;
+    max-height: 9rem;
+    margin: 0.4rem 0;
     object-fit: cover;
-    border-radius: 6px;
-    flex-shrink: 0;
 }
 
-.substack-title {
-    margin: 0 0 0.25rem;
-    color: var(--accent-home);
-    font-family: var(--font-heading), monospace;
+/* keyboard focus */
+.sub-post:focus-visible {
+    outline: 2px solid var(--sub-hot);
+    outline-offset: 3px;
 }
 
-.substack-date,
-.substack-desc {
-    margin: 0 0 0.25rem;
+/* loading, empty and error states */
+.sub-skeleton,
+.sub-empty,
+.sub-error {
+    margin: 0;
+    color: var(--sub-dim);
+}
+
+.sub-error {
+    color: var(--sub-hot);
 }
 
 #github-feed-embed,
 .github-feed-embed {
-    --gh-line: var(--accent-home, #C89A5A);
-    --gh-text: var(--text, #8a9d4d);
-    --gh-panel: rgb(0 0 0 / 0.25);
-    --gh-term: #0b1020;
-    padding: 0.5rem 0.75rem 1rem;
-    font-family: var(--font-body, monospace), monospace;
-}
+    --gh-bg: #0b1020;
+    --gh-fg: #dfdbd2;
+    --gh-dim: #8a94a8;
+    /* 6:1 on the background */
+    --gh-line: #3a4258;
+    /* tree lines */
+    --gh-tan: var(--accent-home, #C89A5A);
+    --gh-green: var(--text, #8a9d4d);
+    --gh-hot: #e0763a;
 
-/* layout: languages + commit side by side, projects below */
-.gh-top {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.gh-project-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-}
-
-.gh-heading {
-    margin: 0 0 0.75rem;
-    color: var(--gh-line);
-    font-family: var(--font-heading, monospace), monospace;
-    font-size: 1.1rem;
-    font-weight: 700;
-    line-height: 1.15;
-}
-
-.gh-projects .gh-heading {
-    margin-bottom: 0.75rem;
-}
-
-/* languages card */
-.gh-card {
+    box-sizing: border-box;
+    max-width: 100%;
     padding: 1rem;
-    background: var(--gh-panel);
-    border: 1px solid var(--gh-line);
-    border-radius: 8px;
+    background: var(--gh-bg);
+    border-radius: 6px;
+    color: var(--gh-fg);
+    font-family: var(--font-body), monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    /* long repo names and messages wrap, never scroll sideways */
+}
+
+@media (min-width: 600px) {
+
+    #github-feed-embed,
+    .github-feed-embed {
+        padding: 1.25rem 1.5rem;
+        font-size: 0.95rem;
+    }
+}
+
+#github-feed-embed a,
+.github-feed-embed a {
+    text-decoration: none;
+}
+
+/* prompt lines */
+.gh-section+.gh-section {
+    margin-top: 1.75rem;
+}
+
+.gh-cmd {
+    margin: 0 0 0.6rem;
+    color: var(--gh-fg);
+    font: inherit;
+    font-weight: 600;
+}
+
+.gh-prompt {
+    margin-right: 0.5ch;
+    color: var(--gh-hot);
+}
+
+.gh-comment {
+    color: var(--gh-dim);
+    font-weight: 400;
+}
+
+/* languages */
+.gh-langs {
+    border-collapse: collapse;
+}
+
+.gh-langs td {
+    padding: 0 1.5ch 0 0;
+    vertical-align: top;
+}
+
+.gh-langs td:last-child {
+    padding-right: 0;
+}
+
+.gh-lang-name {
+    color: var(--gh-fg);
 }
 
 .gh-lang-bar {
-    display: flex;
-    height: 10px;
-    margin-bottom: 0.9rem;
-    border-radius: 5px;
-    overflow: hidden;
-    background: #1d1d1d;
+    white-space: nowrap;
 }
 
-.gh-lang-seg {
-    display: block;
-    height: 100%;
+.gh-bar-on {
+    color: var(--gh-tan);
 }
 
-.gh-lang-legend {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.4rem 1rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.gh-lang-legend li {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: var(--gh-text);
-    font-size: 0.85rem;
+.gh-bar-off {
+    color: var(--gh-line);
 }
 
 .gh-lang-pct {
-    margin-left: auto;
-    color: #dfdbd2;
+    color: var(--gh-dim);
+    text-align: right;
 }
 
-.gh-dot {
-    flex-shrink: 0;
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    margin-right: 0.35rem;
-    border-radius: 50%;
+/* projects: a tree, drawn with borders so it survives line wrapping */
+.gh-tree {
+    margin-left: 0.5ch;
 }
 
-.gh-lang-legend .gh-dot {
-    margin-right: 0;
-}
-
-.gh-note {
-    margin: 0.9rem 0 0;
-    font-size: 0.75rem;
-    color: var(--gh-text);
-    opacity: 0.85;
-}
-
-/* latest commit: styled like a line of `git log --oneline` */
-.gh-commit-line {
-    display: flex;
-    gap: 0.75rem;
-    align-items: baseline;
-    padding: 0.75rem 1rem;
-    background: var(--gh-term);
-    border: 1px solid #1d1d1d;
-    border-left: 4px solid var(--accent, #B5511F);
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 0.9rem;
-    line-height: 1.3;
-}
-
-.gh-commit-line:hover {
-    border-color: var(--gh-line);
-    border-left-color: var(--accent, #B5511F);
-}
-
-.gh-sha {
-    flex-shrink: 0;
-    color: #e0763a;
-    font-weight: 700;
-}
-
-.gh-commit-msg {
-    min-width: 0;
-    color: #dfdbd2;
-    overflow-wrap: anywhere;
-}
-
-.gh-commit-info {
-    margin: 0.6rem 0 0;
-    font-size: 0.8rem;
-}
-
-.gh-repo-link {
-    color: var(--gh-line);
-}
-
-/* projects */
 .gh-project {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 1rem;
-    background: var(--gh-panel);
-    border: 1px solid var(--gh-line);
-    border-radius: 8px;
-    text-decoration: none;
+    position: relative;
+    display: block;
+    padding: 0 0 1rem 2.5ch;
+    border-left: 1px solid var(--gh-line);
+    color: inherit;
 }
 
-.gh-project:hover {
-    background: rgb(255 255 255 / 0.05);
+.gh-project::before {
+    /* the horizontal tick */
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.75em;
+    width: 2ch;
+    border-top: 1px solid var(--gh-line);
+}
+
+.gh-project:last-child {
+    /* the last branch curves instead of continuing */
+    padding-bottom: 0;
+    border-left-color: transparent;
+}
+
+.gh-project:last-child::after {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: 0;
+    height: 0.75em;
+    border-left: 1px solid var(--gh-line);
 }
 
 .gh-project-name {
-    margin: 0;
-    color: var(--gh-line);
-    font-family: var(--font-heading, monospace), monospace;
-    font-size: 1rem;
-    line-height: 1.15;
-    overflow-wrap: anywhere;
+    display: block;
+    color: var(--gh-tan);
+    font-weight: 700;
+}
+
+.gh-project:hover .gh-project-name {
+    text-decoration: underline;
 }
 
 .gh-project-desc {
-    margin: 0;
-    color: var(--gh-text);
-    font-size: 0.85rem;
-    line-height: 1.35;
+    display: block;
+    color: var(--gh-green);
 }
 
-.gh-meta {
+.gh-project-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.25rem 0.9rem;
-    margin-top: auto;
-    padding-top: 0.25rem;
-    color: var(--gh-text);
-    font-size: 0.75rem;
+    gap: 0 2ch;
+    color: var(--gh-dim);
+    font-size: 0.85em;
 }
 
-.gh-meta-item {
-    display: inline-flex;
-    align-items: center;
+/* latest commit */
+.gh-log p {
+    margin: 0;
+}
+
+.gh-k {
+    display: inline-block;
+    min-width: 8ch;
+    color: var(--gh-dim);
+}
+
+.gh-sha {
+    color: var(--gh-hot);
+    font-weight: 700;
+}
+
+.gh-repo-link {
+    color: var(--gh-tan);
+}
+
+.gh-log-msg {
+    display: block;
+    margin-top: 0.6rem;
+    padding-left: 2ch;
+    color: var(--gh-fg);
+}
+
+.gh-log a:hover {
+    text-decoration: underline;
 }
 
 /* keyboard focus */
 .gh-project:focus-visible,
-.gh-commit-line:focus-visible,
-.gh-repo-link:focus-visible {
-    outline: 2px solid #e0763a;
-    outline-offset: 2px;
+.gh-log a:focus-visible {
+    outline: 2px solid var(--gh-hot);
+    outline-offset: 3px;
 }
 
 /* loading, empty and error states */
@@ -415,16 +518,11 @@ p {
 .gh-empty,
 .gh-error {
     margin: 0;
-    color: var(--gh-text);
-    font-size: 0.9rem;
+    color: var(--gh-dim);
 }
 
 .gh-error {
-    color: #e0763a;
-}
-
-#my-github h2 {
-    padding-left: 1vw;
+    color: var(--gh-hot);
 }
 
 @keyframes blink {

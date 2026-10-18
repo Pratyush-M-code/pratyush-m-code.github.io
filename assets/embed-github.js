@@ -1,3 +1,22 @@
+/**
+ * GitHub profile embed (client-side), rendered as a terminal transcript
+ * - Finds elements matching `.github-feed-embed` or `#github-feed-embed`
+ * - Reads configuration from data-* attributes with sensible defaults
+ * - Shows: languages, top projects (as a tree), and your latest commit (as `git log`)
+ *
+ * Attributes:
+ *   data-github-user   GitHub username (required)
+ *   data-projects      how many top projects to show (default 3)
+ *   data-exclude       comma-separated repo names to hide, e.g. "my-site,notes"
+ *
+ * Optional global defaults:
+ *   window.GithubFeedWidget = { username: '', projects: 3, exclude: '', cacheMinutes: 30 };
+ *
+ * Notes:
+ * - Uses GitHub's public REST API without a token (60 requests/hour per visitor IP).
+ *   Results are cached in localStorage so reloads don't use up that limit.
+ * - Only public repositories appear. Forks are ignored.
+ */
 (function () {
     const globalDefaults = (window.GithubFeedWidget || {});
     const defaults = {
@@ -13,17 +32,7 @@
 
     const API = 'https://api.github.com';
     const MAX_LANGUAGES = 6;
-
-    // GitHub's own language colours for the common ones; anything else falls back to your accent
-    const LANG_COLORS = {
-        JavaScript: '#f1e05a', TypeScript: '#3178c6', Python: '#3572A5', HTML: '#e34c26',
-        CSS: '#663399', Java: '#b07219', 'C++': '#f34b7d', C: '#8a8a8a', 'C#': '#178600',
-        Go: '#00ADD8', Rust: '#dea584', Ruby: '#701516', PHP: '#4F5D95', Swift: '#F05138',
-        Kotlin: '#A97BFF', Shell: '#89e051', Jupyter: '#DA5B0B', 'Jupyter Notebook': '#DA5B0B',
-        Julia: '#a270ba', R: '#198CE7', MATLAB: '#e16737', Lua: '#000080', Dart: '#00B4AB',
-        Other: '#6d6d6d'
-    };
-    const FALLBACK_COLOR = '#C89A5A';
+    const BAR_CELLS = 10;
 
     // Build elements with textContent only, so nothing from the API is ever parsed as HTML
     const el = (tag, className, text) => {
@@ -31,6 +40,14 @@
         if (className) node.className = className;
         if (text != null) node.textContent = text;
         return node;
+    };
+
+    const link = (className, href, text) => {
+        const a = el('a', className, text);
+        a.href = href;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        return a;
     };
 
     const fmtDate = (iso) => {
@@ -121,8 +138,21 @@
         }
     };
 
-    // ---------- Languages card ----------
+    // A prompt line: "~$ command  # plain-language note"
+    const prompt = (command, note) => {
+        const h = el('h3', 'gh-cmd');
+        h.setAttribute('aria-label', note);   // screen readers hear the note, not the command
+        h.appendChild(el('span', 'gh-prompt', '~$'));
+        h.appendChild(document.createTextNode(` ${command}`));
+        h.appendChild(el('span', 'gh-comment', `  # ${note}`));
+        return h;
+    };
+
+    // ---------- Languages: one row per language, text-block bars ----------
     const buildLanguages = (repos) => {
+        const section = el('section', 'gh-section');
+        section.appendChild(prompt('languages', 'share of repos by main language'));
+
         const counts = {};
         repos.forEach((r) => { if (r.language) counts[r.language] = (counts[r.language] || 0) + 1; });
 
@@ -133,45 +163,38 @@
         }
         const total = entries.reduce((sum, e) => sum + e[1], 0);
 
-        const card = el('section', 'gh-card gh-languages');
-        card.appendChild(el('h3', 'gh-heading', 'Languages'));
-
         if (!total) {
-            card.appendChild(el('p', 'gh-empty', 'No languages detected yet.'));
-            return card;
+            section.appendChild(el('p', 'gh-empty', 'No languages detected yet.'));
+            return section;
         }
 
-        const shares = entries.map(([name, n]) => ({ name, pct: (n / total) * 100 }));
+        const table = el('table', 'gh-langs');
+        const body = el('tbody');
+        entries.forEach(([name, n]) => {
+            const pct = (n / total) * 100;
+            const filled = Math.min(BAR_CELLS, Math.max(1, Math.round((pct / 100) * BAR_CELLS)));
 
-        const bar = el('div', 'gh-lang-bar');
-        bar.setAttribute('role', 'img');
-        bar.setAttribute('aria-label', 'Languages by repository: ' + shares.map((s) => `${s.name} ${Math.round(s.pct)}%`).join(', '));
-        shares.forEach((s) => {
-            const seg = el('span', 'gh-lang-seg');
-            seg.style.width = `${s.pct}%`;
-            seg.style.background = LANG_COLORS[s.name] || FALLBACK_COLOR;
-            bar.appendChild(seg);
-        });
-        card.appendChild(bar);
+            const tr = el('tr');
+            tr.appendChild(el('td', 'gh-lang-name', name));
 
-        const legend = el('ul', 'gh-lang-legend');
-        shares.forEach((s) => {
-            const li = el('li');
-            const dot = el('span', 'gh-dot');
-            dot.style.background = LANG_COLORS[s.name] || FALLBACK_COLOR;
-            li.appendChild(dot);
-            li.appendChild(el('span', 'gh-lang-name', s.name));
-            li.appendChild(el('span', 'gh-lang-pct', `${s.pct.toFixed(s.pct < 10 ? 1 : 0)}%`));
-            legend.appendChild(li);
+            const bar = el('td', 'gh-lang-bar');
+            bar.setAttribute('aria-hidden', 'true');   // the percentage next to it says the same thing
+            bar.appendChild(el('span', 'gh-bar-on', '█'.repeat(filled)));
+            bar.appendChild(el('span', 'gh-bar-off', '░'.repeat(BAR_CELLS - filled)));
+            tr.appendChild(bar);
+
+            tr.appendChild(el('td', 'gh-lang-pct', `${Math.round(pct)}%`));
+            body.appendChild(tr);
         });
-        card.appendChild(legend);
-        return card;
+        table.appendChild(body);
+        section.appendChild(table);
+        return section;
     };
 
-    // ---------- Top projects ----------
+    // ---------- Top projects: drawn as a tree ----------
     const buildProjects = (repos, cfg) => {
-        const section = el('section', 'gh-projects');
-        section.appendChild(el('h3', 'gh-heading', 'Top projects'));
+        const section = el('section', 'gh-section');
+        section.appendChild(prompt('tree projects', `top ${cfg.projects} by stars`));
 
         const hidden = new Set(
             cfg.exclude.split(',').map((s) => s.trim().toLowerCase()).filter(Boolean)
@@ -188,63 +211,49 @@
             return section;
         }
 
-        const list = el('div', 'gh-project-list');
+        const tree = el('div', 'gh-tree');
         top.forEach((r) => {
-            const a = el('a', 'gh-project');
-            a.href = r.url;
-            a.target = '_blank';
-            a.rel = 'noopener';
+            const a = link('gh-project', r.url);
+            a.appendChild(el('span', 'gh-project-name', r.name));
+            a.appendChild(el('span', 'gh-project-desc', truncate(r.description) || 'No description yet.'));
 
-            a.appendChild(el('h4', 'gh-project-name', r.name));
-            a.appendChild(el('p', 'gh-project-desc', truncate(r.description) || 'No description yet.'));
-
-            const meta = el('div', 'gh-meta');
-            if (r.language) {
-                const lang = el('span', 'gh-meta-item');
-                const dot = el('span', 'gh-dot');
-                dot.style.background = LANG_COLORS[r.language] || FALLBACK_COLOR;
-                lang.appendChild(dot);
-                lang.appendChild(document.createTextNode(r.language));
-                meta.appendChild(lang);
-            }
-            meta.appendChild(el('span', 'gh-meta-item', `${r.stars} ${r.stars === 1 ? 'star' : 'stars'}`));
-            meta.appendChild(el('span', 'gh-meta-item', `${r.forks} ${r.forks === 1 ? 'fork' : 'forks'}`));
-            if (r.pushed) meta.appendChild(el('span', 'gh-meta-item', `Updated ${fmtDate(r.pushed)}`));
+            const meta = el('span', 'gh-project-meta');
+            if (r.language) meta.appendChild(el('span', null, r.language));
+            meta.appendChild(el('span', null, `${r.stars} ${r.stars === 1 ? 'star' : 'stars'}`));
+            if (r.pushed) meta.appendChild(el('span', null, `updated ${fmtDate(r.pushed)}`));
             a.appendChild(meta);
 
-            list.appendChild(a);
+            tree.appendChild(a);
         });
-        section.appendChild(list);
+        section.appendChild(tree);
         return section;
     };
 
-    // ---------- Latest commit (styled like a `git log` line) ----------
+    // ---------- Latest commit: shaped like `git log -1` ----------
     const buildCommit = (commit) => {
-        const section = el('section', 'gh-commit');
-        section.appendChild(el('h3', 'gh-heading', 'Latest commit'));
+        const section = el('section', 'gh-section');
+        section.appendChild(prompt('git log -1', 'latest commit'));
 
         if (!commit) {
             section.appendChild(el('p', 'gh-empty', 'No recent commits to show.'));
             return section;
         }
 
-        const line = el('a', 'gh-commit-line');
-        line.href = commit.url;
-        line.target = '_blank';
-        line.rel = 'noopener';
-        line.appendChild(el('span', 'gh-sha', commit.sha));
-        line.appendChild(el('span', 'gh-commit-msg', truncate(commit.message, 120) || '(no message)'));
-        section.appendChild(line);
+        const log = el('div', 'gh-log');
 
-        const info = el('p', 'gh-commit-info');
-        const repoLink = el('a', 'gh-repo-link', commit.repo);
-        repoLink.href = commit.repoUrl;
-        repoLink.target = '_blank';
-        repoLink.rel = 'noopener';
-        info.appendChild(document.createTextNode('in '));
-        info.appendChild(repoLink);
-        if (commit.date) info.appendChild(document.createTextNode(` on ${fmtDate(commit.date)}`));
-        section.appendChild(info);
+        const row = (key, node) => {
+            const p = el('p');
+            p.appendChild(el('span', 'gh-k', key));
+            p.appendChild(node);
+            log.appendChild(p);
+        };
+
+        row('commit', link('gh-sha', commit.url, commit.sha));
+        row('repo', link('gh-repo-link', commit.repoUrl, commit.repo));
+        if (commit.date) row('date', document.createTextNode(fmtDate(commit.date)));
+
+        log.appendChild(link('gh-log-msg', commit.url, truncate(commit.message, 120) || '(no message)'));
+        section.appendChild(log);
         return section;
     };
 
@@ -269,17 +278,18 @@
             return;
         }
 
-        container.replaceChildren(el('div', 'gh-skeleton', 'Loading…'));
+        container.replaceChildren(el('p', 'gh-skeleton', 'Loading…'));
         container.setAttribute('aria-busy', 'true');
 
         try {
             const data = await loadData(cfg);
+            const nonProfile = data.repos.filter((r) => r.name.toLowerCase() !== cfg.username.toLowerCase());
 
-            const top = el('div', 'gh-top');
-            top.appendChild(buildLanguages(data.repos.filter((r) => r.name.toLowerCase() !== cfg.username.toLowerCase())));
-            top.appendChild(buildCommit(data.commit));
-
-            container.replaceChildren(top, buildProjects(data.repos, cfg));
+            container.replaceChildren(
+                buildLanguages(nonProfile),
+                buildProjects(data.repos, cfg),
+                buildCommit(data.commit)
+            );
         } catch (err) {
             console.error('GitHub feed error:', err);
             container.replaceChildren(el('p', 'gh-error', errorMessage(err, cfg.username)));
