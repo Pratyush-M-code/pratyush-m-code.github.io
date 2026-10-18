@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="index.js" defer></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Geist+Pixel&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Pixelify+Sans:wght@400..700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <h1>Work</h1>
+        <div id="navigation">
+            <nav>
+                <a id="btn" href='../index.html'>Home</a>
+                <a id="btn" href='my-ideas/index.html'>Ideas</a>
+                <a id="btn" href='my-hobbies/index.html'>Hobbies</a>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div id="introduction" class="overlay">
+            <div id="introduction-header">
+                <div id="left-intro-header">
+                    <input type="button" id="reset" value="Run >>>" onclick="reset()">
+                </div>
+                <div id="mid-intro-header">
+                    <span>Pratyush.me@my-ideas:</span>
+                </div>
+                <div id="right-intro-header">
+                    <input type="button" id="deco" class="end-button" onclick="easter_egg()">
+                    <input type="button" id="easter-egg" class="end-button" onclick="stop()">
+                </div>
+            </div>
+            <h2><span id="home-quote" class="home typewriter">We become what we behold. We shape our tools and then our
+                    tools shape us</span></h2>
+        </div>
+        <div id="about-myself" class="overlay">
+            <h2>Who am I?</h2>
+            <p>Hi! I'm Pratyush and welcome to my website! I'm currently a student in India. I personally love physics
+                and AI and wish to pursue computational physics. Amateur violinist with a heart of debate, anything that
+                results in me learning something new is right up my alley!</p>
+        </div>
+    </main>
+    <footer class="site-footer">
+        <div class="footer-socials">
+            <a href="mailto:thatredpandaguy333@gmail.com" aria-label="Email"> <i class="fa-solid fa-envelope"></i> </a>
+            <a href="https://discord.com/users/" target="_blank" rel="noopener noreferrer" aria-label="Discord"> <i
+                    class="fa-brands fa-discord"></i> </a>
+            <a href="https://hackclub.enterprise.slack.com/team/U0BRB5YE457" target="_blank" rel="noopener noreferrer"
+                aria-label="Slack"> <i class="fa-brands fa-slack"></i> </a>
+            <a href="https://github.com/Pratyush-M-code" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                <i class="fa-brands fa-github"></i> </a>
+            <a href="https://www.linkedin.com/in/cognito-ergo-sum" target="_blank" rel="noopener noreferrer"
+                aria-label="LinkedIn"> <i class="fa-brands fa-linkedin"></i> </a>
+            <a href="https://thinkthereforeyouare.substack.com/" target="_blank" rel="noopener noreferrer"
+                aria-label="Substack"> <i class="fa-solid fa-newspaper"></i> </a>
+        </div>
+        <p class="footer-credit"> Made by Pratyush Mohanty Circar © 2026 </p>
+    </footer>
+</body>
+
+</html>

@@ -77,6 +77,43 @@ p {
     border-radius: 10px;
 }
 
+header {
+    display: flex;
+    flex-direction: row;
+}
+
+#navigation {
+    margin: auto 0 auto auto;
+}
+
+a:hover {
+    color: var(--accent-home);
+}
+
+#btn {
+    background-color: var(--accent);
+    color: var(--text);
+    border: 5px solid var(--accent);
+    box-shadow: 0 0 10px var(--shadow);
+    font-size: 1.5rem;
+    font-family: var(--font-body);
+    line-height: 1.2;
+    font-weight: 550;
+    font-style: normal;
+    font-optical-sizing: auto;
+    margin: 0.5vh 1vw;
+    cursor: pointer;
+}
+
+#btn:hover:not(.active) {
+    background-color: var(--accent-home) !important;
+}
+
+#btn.active {
+    background-color: var(--active) !important;
+    color: #000000;
+}
+
 #introduction {
     border: 5px solid var(--accent-home);
     padding: 0;
